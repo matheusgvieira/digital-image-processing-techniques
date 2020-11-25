@@ -4,13 +4,6 @@ import matplotlib.pyplot as plt;
 import collections;
 
 
-# Function for to find values nearests in array 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    # return array[idx]
-    return idx;
-
 # Function for to find indexs of repeated values 
 def numberRepeated(s):
     oc_set = set() 
@@ -97,11 +90,7 @@ new_img = cv.normalize(new_img, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U);
 
 cv.imwrite('../images/intensity_adjustment/woman_eq.png',new_img)
 
-fig, axes = plt.subplots( nrows=1, 
-                          ncols=2,
-                          sharex=True, 
-                          sharey=True, 
-                          figsize=(10, 10))
+fig, axes = plt.subplots(1, 2,figsize=(10, 10));
 ax = axes.ravel()
 
 ax[0].imshow(img, cmap=plt.cm.gray);
