@@ -13,20 +13,9 @@ imFillHole = cv.normalize(imFillHole, None, -1, 1, cv.NORM_MINMAX, cv.CV_8U);
 kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5))
 dilation = cv.dilate(imFillHole,kernel,iterations = 1)
 
-# plt.figure()
-# # plt.axis('off')
-# plt.imshow(dilation, cmap=plt.cm.gray) 
-# # plt.title("Image Original")
-# plt.show()
 
 num_labels, labels = cv.connectedComponents(dilation)
 print(f'Número de componentes rotulados = {num_labels - 1}')
-
-# plt.figure()
-# # plt.axis('off')
-# plt.imshow(labels, cmap="jet") 
-# # plt.title("Image Original")
-# plt.show()
 
 aux = np.asarray(labels).reshape(-1)
 
@@ -44,7 +33,7 @@ porcentagem = [round((x*100)/sum(counterValues),2) for x in counterValues];
 print(f'porcentagem = {porcentagem}')
 
 # Print images
-fig, axes = plt.subplots(3, 2,figsize=(10, 10));
+fig, axes = plt.subplots(2, 3,figsize=(20, 10));
 ax = axes.ravel()
 
 ax[0].imshow(img, cmap=plt.cm.gray);
@@ -63,6 +52,30 @@ for a in ax:
 fig.tight_layout()
 plt.show() 
 
-    
 
+plt.figure()
+plt.imshow(imFillHole, cmap=plt.cm.gray) 
+plt.title("Binary Image Normalized")
+plt.show()
+
+plt.figure()
+plt.imshow(dilation, cmap=plt.cm.gray) 
+plt.title("Binary Image After Dilation")
+plt.show()
+
+plt.figure()
+plt.imshow(labels, cmap=plt.cm.gray) 
+plt.title("Labeled Image")
+plt.show()
+
+plt.figure()
+plt.imshow(labels, cmap="jet") 
+plt.title("Labeled Image Jet")
+plt.show()
+    
+# cv.imwrite('../images/granulometry/outputs/img.png',img)
+# cv.imwrite('../images/granulometry/outputs/thresh.png',thresh)
+# cv.imwrite('../images/granulometry/outputs/imFillHole.png',imFillHole)
+# cv.imwrite('../images/granulometry/outputs/dilation.png',dilation)
+# cv.imwrite('../images/granulometry/outputs/labels.png',labels)
 

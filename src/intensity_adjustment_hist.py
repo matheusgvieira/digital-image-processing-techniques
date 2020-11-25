@@ -18,7 +18,15 @@ def numberRepeated(s):
 
 # Read and show image
 img= cv.imread('../images/intensity_adjustment/inputs/eye.jpg', 0);
-# img= cv.imread('../images/intensity_adjustment/inputs/woman.jpg', 0);
+img2 = cv.imread('../images/intensity_adjustment/inputs/woman.jpg', 0);
+
+fig, axes = plt.subplots(1, 2,figsize=(10, 10));
+ax = axes.ravel()
+
+ax[0].imshow(img, cmap=plt.cm.gray);
+ax[0].set_title('(a) eye.jpg');
+ax[1].imshow(img2, cmap=plt.cm.gray)
+ax[1].set_title('(b) woman.jpg');
 
 w, h = img.shape;
 
@@ -88,7 +96,7 @@ for i in range(w):
 img = cv.normalize(img, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U);
 new_img = cv.normalize(new_img, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U);
 
-cv.imwrite('../images/intensity_adjustment/woman_eq.png',new_img)
+# cv.imwrite('../images/intensity_adjustment/woman_eq.png',new_img)
 
 fig, axes = plt.subplots(1, 2,figsize=(10, 10));
 ax = axes.ravel()

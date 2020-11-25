@@ -1,6 +1,6 @@
 clear, close all, clc
 
-img2 = imread('../images/highlight/inputs/dogs.jpg');
+img2 = rgb2gray(imread('../images/highlight/inputs/statue.jpeg'));
 figure, imshow(img2)
 
 
@@ -18,10 +18,10 @@ img2i = abs(ifft2(ifftshift(Img2)));
 [u,v] = meshgrid(1:N,1:M);
 D = sqrt((u-M/2).^2 + (v-N/2).^2);
  
-gamaL = 0.25;
+gamaL = 0.5;
 gamaH = 2;
 c = 1;
-D0 = 120;
+D0 = 80;
 
 Hlp = (gamaH - gamaL)*(1 - exp(-c*((D.^2)/(D0.^2)))) + gamaL;
 ##Hlp = exp(-D.^2/(2*D0^2));

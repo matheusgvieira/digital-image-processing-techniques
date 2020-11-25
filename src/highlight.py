@@ -1,108 +1,123 @@
-import cv2 as cv;
 import numpy as np;
-import matplotlib.pyplot as plt;
-
-img = cv.imread('../images/highlight/inputs/dogs.jpg', 0);
-# gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-# img = cv.normalize(img, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U);
-
-# plt.figure()
-# # plt.axis('off')
-# plt.imshow(img, cmap=plt.cm.gray) 
-# # plt.title("Image Original")
-# plt.show()
+import cv2 as cv;
+from matplotlib import pyplot as plt
 
 
-def highlight(img):  
+def magnitude_spectrum(img):
+    # np.uint8 to np.float32
+    img_float32 = np.copy(img).astype(np.float32);
+    img_float32 = np.where(img_float32 == 0, np.exp(0), img_float32) 
+    
+    # ln
+    img_log = np.log(img_float32);
+    # Calc DFT
+    img_dft = np.fft.fft2(img_log)
+    fshift = np.fft.fftshift(img_dft)
+    magnitude_spectrum = 20*np.log(np.abs(fshift))
+    
+    return magnitude_spectrum;
+
+def filtragem_homomorfica(img):
+    # Get with and height of image
+    m, n = img.shape;
+    
+    # Define P e Q
+    P = np.floor(2*m)
+    Q = np.floor(2*n)
+    
+    # np.uint8 to np.float32
+    img_float32 = np.copy(img).astype(np.float32);
+    img_float32 = np.where(img_float32 == 0, np.exp(0), img_float32) 
+    
+    # ln
+    img_log = np.log(img_float32);
     
     # Calc DFT
-    Img = np.fft.fftshift(np.fft.fft2(img));
-    Img_m = np.absolute(Img);
-    
-    # plt.imshow(np.log(Img_m), cmap = 'gray')
-    # plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
-    # plt.show()
+    img_dft = np.fft.fft2(img_log)
+    fshift = np.fft.fftshift(img_dft)
     
     # Create H(u,v) and D(u,v)
     D = np.copy(img).astype(np.float64)
-    Hhp = np.copy(img).astype(np.float64)    
+    H = np.copy(img).astype(np.float64)    
     
     # Set D(u,v)
-    M, N = img.shape; # Get with and height of image
-    u, v = np.meshgrid(range(M), range(N), sparse=False, indexing='ij');
-    D = np.sqrt((u-M/2)**2+(v-N/2)**2)
+    u, v = np.meshgrid(range(m), range(n), sparse=False, indexing='ij');
+    D = ((u-P/2)**2+(v-Q/2)**2)**(0.5);
     
     
-    # Define params   
-    Do = 5;
-    # n = 20;
+    # Define params      
+    gamaL = 0.5;
+    gamaH = 2;
+    c = 1;
+    Do = 80;
      
-    # Set Hhp(u,v)
-    # Hlp = np.exp((-(D**2))/(2*Do**2));
-    # Hhp = np.ones(img.shape) - Hlp;
-    # Hhp = 1 - np.exp((-(D**2))/(2*Do**2));
-    Hhp = -4*(np.pi**2)*(D**2);
-    # Hhp = 1/(1 + (D/Do)**(2*n));
-      
-    plt.plot(Hhp);
+    # Set H(u,v)
+    H = (gamaH - gamaL)*(1-np.exp(-c*((D**2)/(Do**2)))) + gamaL;   
+    
+    plt.plot(np.log(np.abs(H)));
     plt.title("Filtro no domínio da frequência.")
     plt.show();
     
-    plt.plot(np.log(np.absolute(Hhp)));
-    plt.title("Aspectro do filtro no domínio da frequência.")
-    plt.show();
-    
-    # laplacian = cv.Laplacian(img,cv.CV_64F)
-    # laplacian1 = laplacian/laplacian.max()
-    # output = img - laplacian1
-    # Output = np.fft.fftshift(np.fft.fft2(output));
-    # Output_m = np.absolute(Output);
-    
     # Calc DFT inv
-    G = Img*Hhp;
-    f2 = np.fft.ifft2(np.fft.ifftshift(G));
-    gp = np.real(f2)*((-1)**(M+N));
-    out = img - gp;
-    Out = np.fft.fftshift(np.fft.fft2(out));
-    Out_m = np.absolute(Out);
-    img_filtered = cv.normalize(out, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U)
+    img_back = np.fft.ifft2(H*img_dft);
     
-    # Print images
-    fig, axes = plt.subplots(2, 2,figsize=(10, 10));
-    ax = axes.ravel()
+    # e
+    g = np.real(np.exp(img_back));
     
-    ax[0].imshow(img, cmap=plt.cm.gray);
-    ax[0].set_title('Image Original');
-    ax[1].imshow(img - img_filtered, cmap=plt.cm.gray)
-    ax[1].set_title('Image Filtrada');
-    ax[2].imshow(np.log(Img_m), cmap=plt.cm.gray)
-    ax[2].set_title('Magnitude Spectrum');
-    ax[3].imshow(np.log(Out_m), cmap=plt.cm.gray)
-    ax[3].set_title('Magnitude Spectrum Output');
+    # np.uint8 + stagger
+    img_filtered = cv.normalize(g, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U);
+    return(img_filtered)
     
-    for a in ax:
-        a.axis('off')
-    fig.tight_layout()
-    plt.show() 
-
-
-highlight(img);
-
-
-# laplacian = cv.Laplacian(img,cv.CV_64F)
-# # laplacian = cv.normalize(laplacian, None, -1, 255, cv.NORM_MINMAX, cv.CV_8U);
-# # But this tends to localize the edge towards the brighter side.
-# laplacian1 = laplacian/laplacian.max()
-
-# fig, axes = plt.subplots(1, 2,figsize=(10, 10));
-# ax = axes.ravel()
     
-# ax[0].imshow(img, cmap=plt.cm.gray);
-# ax[0].set_title('Image Original');
-# ax[1].imshow(img - laplacian1, cmap=plt.cm.gray)
-# ax[1].set_title('Image Filtrada');
+img = cv.imread('../images/highlight/inputs/statue.jpeg',0)
+img_hom = filtragem_homomorfica(img);
 
-# for a in ax:
-#     a.axis('off')
-# fig.tight_layout()
-# plt.show() 
+# Print images
+fig, axes = plt.subplots(2, 2,figsize=(10, 10));
+ax = axes.ravel()
+
+ax[0].imshow(img, cmap=plt.cm.gray);
+ax[0].set_title('(a) Image Original');
+ax[1].imshow(img_hom, cmap=plt.cm.gray)
+ax[1].set_title('(b) Image Filtrada');
+ax[2].imshow(magnitude_spectrum(img), cmap=plt.cm.gray)
+ax[2].set_title('(c) Aspectro da Imagem Original');
+ax[3].imshow(magnitude_spectrum(img_hom), cmap=plt.cm.gray)
+ax[3].set_title('(d) Aspectro da Imagem Filtrada');
+
+for a in ax:
+    a.axis('off')
+fig.tight_layout()
+plt.show() 
+
+# cv.imwrite('../images/highlight/inputs/statue2.png',img)
+# cv.imwrite('../images/highlight/outputs/statue2.png',img_hom)
+   
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+
