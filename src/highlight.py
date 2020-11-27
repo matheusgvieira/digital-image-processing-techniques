@@ -54,7 +54,7 @@ def filtragem_homomorfica(img):
     # Set H(u,v)
     H = (gamaH - gamaL)*(1-np.exp(-c*((D**2)/(Do**2)))) + gamaL;   
     
-    plt.plot(np.log(np.abs(H)));
+    plt.plot(20*np.log(np.abs(H)));
     plt.title("Filtro no domínio da frequência.")
     plt.show();
     

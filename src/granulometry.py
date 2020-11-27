@@ -5,12 +5,12 @@ import scipy.ndimage as ndimage
 import collections
 
 
-img = cv.imread('../images/granulometry/inputs/coin.jpg', 0);
+img = cv.imread('../images/granulometry/inputs/coin_usa.jpg', 0);
 ret, thresh = cv.threshold(img, 120, 255, cv.THRESH_BINARY_INV); 
 imFillHole = ndimage.binary_fill_holes(thresh).astype(np.uint8);
 imFillHole = cv.normalize(imFillHole, None, -1, 1, cv.NORM_MINMAX, cv.CV_8U);
 
-kernel = cv.getStructuringElement(cv.MORPH_RECT,(5,5))
+kernel = cv.getStructuringElement(cv.MORPH_RECT,(10,10))
 dilation = cv.dilate(imFillHole,kernel,iterations = 1)
 
 
@@ -52,6 +52,15 @@ for a in ax:
 fig.tight_layout()
 plt.show() 
 
+plt.figure()
+plt.imshow(img, cmap=plt.cm.gray) 
+plt.title("Image Original")
+plt.show()
+
+plt.figure()
+plt.imshow(thresh, cmap=plt.cm.gray) 
+plt.title("Binary Image Normalized")
+plt.show()
 
 plt.figure()
 plt.imshow(imFillHole, cmap=plt.cm.gray) 
